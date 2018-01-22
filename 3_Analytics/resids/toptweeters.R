@@ -1,5 +1,5 @@
-# Extracts graph edges and vertices for popular tweeters I suppose
 extract_graph_vars <- function(dat){
+  # Extracts graph edges and vertices for popular tweeters I suppose
   
   # Graph Edge and Vertices
   retweeteds <- dat[!is.na(dat$Retweet_from),]

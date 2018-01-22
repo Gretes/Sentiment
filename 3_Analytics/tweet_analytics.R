@@ -1,7 +1,12 @@
-setwd("~/Documents/Sentiment/analytics")
-library("quanteda")
+setwd("~/Documents/Sentiment/3_Analytics")
+# library("quanteda")
 library("jsonlite")
-dat <-jsonlite::fromJSON("nltk_example/sampletweet.json")
+library("wordcloud")
+source("utils_part1.R")
+source("utils_part2.R")
+
+dat <- fromJSON("../nltk_example/sampletweet.json")
+head(dat)
 
 ##### Part 1: HASHTAG ANALYSIS ######
 # Extract hashtags and calculate their TFs
@@ -18,14 +23,24 @@ absTFs <- absTFs[-1,]
 # Do inner join to match relative TFs of hashtags with the tweets
 dat$tweet_key <- as.numeric(rownames(dat))
 dat <- merge(dat,hashtags, by="tweet_key")
+head(dat)
 
 # Do inner join to match filterout tweets with unnecessary hashtags
-
 dat$hashtag_lower <- tolower(dat$hashtag)
 dat <- merge(dat,absTFs, by="hashtag_lower")
+head(dat)
 
 # Plot wordcloud
-wordcloud::wordcloud(absTFs$hashtag_lower,absTFs$TF_Abs)
+if(require(RColorBrewer)){
+  
+  pal <- brewer.pal(6,"Dark2")
+  pal <- pal[-(1)]
+  wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,,.15,pal)
+  
+  #random colors
+  wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,TRUE,.15,pal)
+  wordcloud(absTFs$hashtag_lower,absTFs$TF_Abs,random.order = F,colors = pal)
+} else {wordcloud(absTFs$hashtag_lower,absTFs$TF_Abs,random.order = F)}
 
 # Pivot tags to columns
 pivot <- pivot_tags_to_columns(dat)
@@ -45,12 +60,14 @@ colnames(pivot) <- c("Date","Hashtag","Min","Max")
 plot_theme_river(pivot)
 
 ##### Part 2: BASIC INFLUENCER ANALYSIS ######
+library("igraph")
 graphVars <- extract_graph_vars(dat)[-4]
 actors <- with(graphVars, c(User,Retweet_from))
 actors <- actors[!duplicated(actors)]
 
+## Network of top tweeters calculated above
 names(graphVars) <- c("from","to","Count")
 gr <- graph_from_data_frame(graphVars,T,actors)
-plot(gr) # Someone please check whether the graph is correct!
+plot(gr,edge.arrow.size=.5) # Someone please check whether the graph is correct!
 
 
