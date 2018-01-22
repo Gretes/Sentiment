@@ -12,7 +12,7 @@ from collections import defaultdict
 
 client = MongoClient('mongodb://veli:kamil7insan@ds237445.mlab.com:37445/heroku_wzpvdrhs')
 db = client['heroku_wzpvdrhs']
-collection = db.thy
+collection = db.bein1
 
 # dili turkce olan post sayisi
 # print(collection.find({"lang": "tr"}).count())
@@ -20,11 +20,28 @@ collection = db.thy
 
 # Regex query for turkcell
 #query = { "text": { "$regex": "/.*kcell.*/"} }
-posts = pd.DataFrame([p for p in collection.find().limit(10000)])
+posts = pd.DataFrame([p for p in collection.find()])
 
 # write to json
 posts.to_json("sample.json")
 
+data = []
+counter = 1
+datname = 1
+for post in collection.find():
+    data.append(post)
+    if counter % 500 == 0:
+        pd.DataFrame(data).to_json('beindata' + str(datname) + ".json")
+        print(counter)
+        counter += 1
+        datname += 1
+        data = []
+    else:
+        counter += 1
+
+
+        with open('data' + datname + '.txt', 'w') as outfile:
+            json.dumps(data, outfile)
 tweets = posts['text']
 # [getstems(t) for t in tweets]
 
