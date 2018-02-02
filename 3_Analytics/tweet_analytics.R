@@ -1,5 +1,5 @@
 setwd("~/Documents/Sentiment/3_Analytics")
-# library("quanteda")
+library("quanteda")
 library("jsonlite")
 library("wordcloud")
 source("utils_part1.R")
@@ -9,6 +9,7 @@ dat <- fromJSON("../nltk_example/sampletweet.json")
 head(dat)
 
 ##### Part 1: HASHTAG ANALYSIS ######
+# 
 # Extract hashtags and calculate their TFs
 hashtags <- extract_hashtags(dat$Tweet)
 head(hashtags)
@@ -35,10 +36,10 @@ if(require(RColorBrewer)){
   
   pal <- brewer.pal(6,"Dark2")
   pal <- pal[-(1)]
-  wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,,.15,pal)
+  # wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,,.15,pal)
   
   #random colors
-  wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,TRUE,.15,pal)
+  # wordcloud(d$word,d$freq,c(8,.3),2,,TRUE,TRUE,.15,pal)
   wordcloud(absTFs$hashtag_lower,absTFs$TF_Abs,random.order = F,colors = pal)
 } else {wordcloud(absTFs$hashtag_lower,absTFs$TF_Abs,random.order = F)}
 
@@ -62,6 +63,7 @@ plot_theme_river(pivot)
 ##### Part 2: BASIC INFLUENCER ANALYSIS ######
 library("igraph")
 graphVars <- extract_graph_vars(dat)[-4]
+toptweeters <- graphVars[[2]];  graphVars  <- graphVars[[1]]
 actors <- with(graphVars, c(User,Retweet_from))
 actors <- actors[!duplicated(actors)]
 
@@ -70,4 +72,11 @@ names(graphVars) <- c("from","to","Count")
 gr <- graph_from_data_frame(graphVars,T,actors)
 plot(gr,edge.arrow.size=.5) # Someone please check whether the graph is correct!
 
+##### Part 3: BASIC NLP ######
+dat <- fromJSON("../nltk_example/sampletweet.json")
+dat <- cleandat(dat)
+twCorpus <- corpus(dat,text_field = 'Tweet',docid_field = 'User')
+summary(twCorpus)
+
+kwic(twCorpus, "vote")
 

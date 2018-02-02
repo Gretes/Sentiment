@@ -15,7 +15,7 @@ extract_graph_vars <- function(dat){
   
   graphVars   <- merge(graphVars,toptweeters,by="User")
   colnames(graphVars)[3] <- "Count"
-  graphVars
+  list(graphVars,toptweeters)
 }
 
 
