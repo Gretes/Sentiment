@@ -4,6 +4,7 @@ library("jsonlite")
 library("wordcloud")
 source("utils_part1.R")
 source("utils_part2.R")
+source("utils_part3.R")
 
 dat <- fromJSON("../nltk_example/sampletweet.json")
 head(dat)
@@ -62,8 +63,8 @@ plot_theme_river(pivot)
 
 ##### Part 2: BASIC INFLUENCER ANALYSIS ######
 library("igraph")
-graphVars <- extract_graph_vars(dat)[-4]
-toptweeters <- graphVars[[2]];  graphVars  <- graphVars[[1]]
+graphVars <- extract_graph_vars(dat)
+toptweeters <- graphVars[[2]];  graphVars  <- graphVars[[1]][-4]
 actors <- with(graphVars, c(User,Retweet_from))
 actors <- actors[!duplicated(actors)]
 
@@ -74,9 +75,17 @@ plot(gr,edge.arrow.size=.5) # Someone please check whether the graph is correct!
 
 ##### Part 3: BASIC NLP ######
 dat <- fromJSON("../nltk_example/sampletweet.json")
-dat <- cleandat(dat)
+dat <- cleantweets(dat)
 twCorpus <- corpus(dat,text_field = 'Tweet',docid_field = 'User')
 summary(twCorpus)
+# kwic(twCorpus, "vote")
 
-kwic(twCorpus, "vote")
+tweetDFM <- dfm(twCorpus, remove = stopwords("english"), 
+                stem = TRUE, remove_punct = TRUE,
+                tolower=T)
+summary(tweetDFM)
+topfeatures(tweetDFM,20)
 
+textplot_wordcloud(tweetDFM, min.freq = 10, random.order = FALSE,
+                   rot.per = .25, 
+                   colors = RColorBrewer::brewer.pal(8,"Dark2"))
