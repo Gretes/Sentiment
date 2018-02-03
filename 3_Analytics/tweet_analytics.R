@@ -89,3 +89,42 @@ topfeatures(tweetDFM,20)
 textplot_wordcloud(tweetDFM, min.freq = 10, random.order = FALSE,
                    rot.per = .25, 
                    colors = RColorBrewer::brewer.pal(8,"Dark2"))
+
+tweetTFIDF <- tfidf(tweetDFM)
+topfeat <- topfeatures(tweetTFIDF,ncol(tweetTFIDF))
+topfeat <- topfeat[topfeat>quantile(topfeat,.9)]
+
+tweetTFIDF <- as.data.frame(tweetTFIDF)
+tweetTFIDF <- tweetTFIDF[colnames(tweetTFIDF)%in%names(topfeat)]
+
+library(FactoMineR)
+library(factoextra)
+
+pca <- PCA(tweetTFIDF,graph = F)
+fviz_eig(pca, addlabels = TRUE)
+
+fviz_cos2(pca, choice = "var", axes = 1:2,top = 50)
+
+fviz_pca_var(pca, col.var = "black")
+
+fviz_pca_var(pca, col.var = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE # Avoid text overlapping
+)
+
+#### Explained variances w.r.t. dimensions
+fviz_screeplot(pca, addlabels = TRUE)
+
+#### Adding a threshold level for the plot
+fviz_screeplot(ca) +
+  geom_hline(yintercept=33.33, linetype=2, color="red")
+
+#### Biplot that monitors the variances in both columns and rows
+fviz_ca_biplot(ca, repel = TRUE)
+
+
+#### Analysis for row variables
+row <- get_ca_row(ca)
+row$coord
+row$contrib
+row$cos2
